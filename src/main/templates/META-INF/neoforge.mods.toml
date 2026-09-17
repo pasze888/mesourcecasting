@@ -1,0 +1,89 @@
+# This is an example neoforge.mods.toml file. It contains the data relating to the loading mods.
+# There are several mandatory fields (#mandatory), and many more that are optional (#optional).
+# The overall format is standard TOML format, v0.5.0.
+# Note that there are a couple of TOML lists in this file.
+# Find more information on toml format here:  https://github.com/toml-lang/toml
+
+# The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
+modLoader="javafml" #mandatory
+
+# A version range to match for said mod loader - for regular FML @Mod it will be the FML version. This is currently 2.
+loaderVersion="${loader_version_range}" #mandatory
+
+# The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
+license="${mod_license}"
+
+# A list of mods - how many allowed here is determined by the individual mod loader
+[[mods]] #mandatory
+
+# The modid of the mod
+modId="${mod_id}" #mandatory
+
+# The version number of the mod
+version="${mod_version}" #mandatory
+
+# A display name for the mod
+displayName="${mod_name}" #mandatory
+
+# The authors of the mod, displayed in the mod UI
+authors="${mod_authors}"
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+施法时直接消耗 ME 网络中的魔源。
+
+携带任意一台已与无线接入点绑定的 AE2 无线终端（AE2 原生或 AE2WTLib 等附属添加的均可），
+施法时 Ars Nouveau 的魔力将优先由 ME 网络中的魔源支付，网络补不上的部分才扣玩家自身魔力。
+魔源需要存放在网络中的 ME 魔源存储元件里（由 Ars Énergistique 提供）。
+'''
+
+# 声明 Mixin 配置，FML 才能加载它
+[[mixins]]
+config="${mod_id}.mixins.json"
+
+# 依赖：NeoForge 与 Minecraft
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+# 硬依赖 1：Ars Nouveau —— 施法方，本模组 Mixin 它的 LivingCaster
+[[dependencies.${mod_id}]]
+    modId="ars_nouveau"
+    type="required"
+    versionRange="[5.13.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# 硬依赖 2：Applied Energistics 2 —— 无线终端的绑定与 ME 存储网络
+[[dependencies.${mod_id}]]
+    modId="ae2"
+    type="required"
+    versionRange="[19.2.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# 硬依赖 3：Ars Énergistique —— ME 网络魔源键（arseng:source）的注册者
+[[dependencies.${mod_id}]]
+    modId="arseng"
+    type="required"
+    versionRange="[2.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# 可选依赖：AE2 Wireless Terminals —— 其注册的无线终端同样能被识别，不装也不影响功能
+[[dependencies.${mod_id}]]
+    modId="ae2wtlib"
+    type="optional"
+    versionRange="[19.2.0,)"
+    ordering="AFTER"
+    side="BOTH"

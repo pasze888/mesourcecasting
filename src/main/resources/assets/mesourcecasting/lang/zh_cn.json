@@ -1,0 +1,6 @@
+{
+  "message.mesourcecasting.terminal_not_linked": "未找到已绑定的无线终端：请把无线终端放入 ME 无线接入点完成配对。",
+  "message.mesourcecasting.network_not_found": "找不到终端绑定的 ME 网络：接入点可能已被拆除或所在区块未加载。",
+  "message.mesourcecasting.no_source_storage": "此 ME 网络中没有魔源存储：请放入 ME 魔源元件或 ME 魔源罐。",
+  "mesourcecasting.config.network_pays_full_cost": "网络支付整笔花费"
+}

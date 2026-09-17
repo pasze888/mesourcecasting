@@ -1,0 +1,6 @@
+{
+  "message.mesourcecasting.terminal_not_linked": "No linked wireless terminal: pair one in an ME Wireless Access Point.",
+  "message.mesourcecasting.network_not_found": "The ME network linked by your terminal cannot be found: the access point may have been removed or its chunk is not loaded.",
+  "message.mesourcecasting.no_source_storage": "This ME network has no source storage: add an ME Source Cell or ME Source Jar.",
+  "mesourcecasting.config.network_pays_full_cost": "Network pays the full cost"
+}
