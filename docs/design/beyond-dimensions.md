@@ -27,6 +27,19 @@ KeyAmount moved = net.getUnifiedStorage().extract(sourceKey, amount, simulate, f
 之所以还要直接支持，是因为那条路的前提是玩家已经建起 ME 网络；只有维度网络的玩家用不上。
 两条路互不冲突，同时存在时玩家任选。
 
+## 与 AE 存储元件的重叠
+
+上面说过它的 AE 存储元件是读写直连，于是「ME 网络」与「维度网络直连」这两路来源可能指向同
+一个池：ME 侧抽走的正是维度网络里的魔源。
+
+扣费不会重复抽（链上顺序取、`remaining` 递减），但判定会重复计数（模拟不改变网络，两路各自
+看到的是同一个池的完整数量）。完整的行为说明见
+[payment-model.md](payment-model.md#两路来源指向同一个池时)。
+
+不做重叠检测的原因：`NetStorageCell` 持有的 `UnifiedStorage` 是私有字段，而且这个类不在
+超越维度的 api 包里；AE2 侧也没有公开 API 能枚举「某个存储元件绑定的是哪个网络」。既然精确
+判定做不到，就只剩上界（求和）与下界（取大）两个选择，本模组选上界——两路真正独立时它是对的。
+
 ## 可选依赖的隔离
 
 超越维度是**可选依赖**（`compileOnly` + `localRuntime`，mods.toml 里 `type="optional"`）。
