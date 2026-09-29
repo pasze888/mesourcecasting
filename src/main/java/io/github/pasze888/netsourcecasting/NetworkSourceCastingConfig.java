@@ -1,9 +1,9 @@
-package io.github.pasze888.mesourcecasting;
+package io.github.pasze888.netsourcecasting;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * 本模组的通用配置（{@code config/mesourcecasting-common.toml}）。
+ * 本模组的通用配置（{@code config/netsourcecasting-common.toml}）。
  *
  * <p>一个开关决定网络参与施法扣费的程度，另一个决定 ME 网络与超越维度「维度网络」谁先出。
  * 两者各有自洽的语义，区别只在玩家自己的偏好，因此交给玩家选，而不是替他拍板。
@@ -11,7 +11,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * <p>配置于 {@code FMLCommonSetupEvent} 之前加载完成，而施法发生在游戏运行期，故
  * {@link #NETWORK_PAYS_FULL_COST} 在 {@code expendMana} / {@code enoughMana} 里读取是安全的。
  */
-public final class MESourceCastingConfig {
+public final class NetworkSourceCastingConfig {
 
     /** 配置规格，由主类在构造时注册到 {@code ModConfig.Type.COMMON}。 */
     public static final ModConfigSpec SPEC;
@@ -36,7 +36,7 @@ public final class MESourceCastingConfig {
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
-        builder.comment("ME 网络魔源与玩家自身魔力的扣费分工")
+        builder.comment("网络魔源与玩家自身魔力的扣费分工")
                 .push("payment");
 
         NETWORK_PAYS_FULL_COST = builder
@@ -45,7 +45,7 @@ public final class MESourceCastingConfig {
                         "false：网络只补缺口——玩家魔力先照常扣，只有玩家付不起的部分才由网络承担；",
                         "        玩家魔力够付整笔时网络一点不动。",
                         "两种设置下，网络与玩家魔力加起来仍不足以支付时都不会施法。")
-                .translation("mesourcecasting.config.network_pays_full_cost")
+                .translation("netsourcecasting.config.network_pays_full_cost")
                 .define("network_pays_full_cost", true);
 
         builder.pop();
@@ -58,7 +58,7 @@ public final class MESourceCastingConfig {
                         "true（默认）：先花 ME 网络里的魔源，不够才动超越维度的「维度网络」。",
                         "false：反过来，先花维度网络里的魔源，不够才动 ME 网络。",
                         "未安装超越维度时该项无效果。")
-                .translation("mesourcecasting.config.me_first")
+                .translation("netsourcecasting.config.me_first")
                 .define("me_first", true);
 
         builder.pop();
@@ -66,6 +66,6 @@ public final class MESourceCastingConfig {
         SPEC = builder.build();
     }
 
-    private MESourceCastingConfig() {
+    private NetworkSourceCastingConfig() {
     }
 }

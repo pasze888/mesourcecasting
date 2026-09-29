@@ -1,14 +1,14 @@
-package io.github.pasze888.mesourcecasting.mixin;
+package io.github.pasze888.netsourcecasting.mixin;
 
 import com.hollingsworth.arsnouveau.api.mana.IManaCap;
 import com.hollingsworth.arsnouveau.api.spell.wrapped_caster.LivingCaster;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.pasze888.mesourcecasting.MESourceCasting;
-import io.github.pasze888.mesourcecasting.MESourceCastingConfig;
-import io.github.pasze888.mesourcecasting.source.SourceChain;
-import io.github.pasze888.mesourcecasting.source.SourceCost;
+import io.github.pasze888.netsourcecasting.NetworkSourceCasting;
+import io.github.pasze888.netsourcecasting.NetworkSourceCastingConfig;
+import io.github.pasze888.netsourcecasting.source.SourceChain;
+import io.github.pasze888.netsourcecasting.source.SourceCost;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +53,7 @@ public abstract class LivingCasterMixin {
      * 或玩家魔力本来就够时，一律原样返回。
      */
     @Inject(method = "enoughMana", at = @At("RETURN"), cancellable = true)
-    private void mesourcecasting$enoughMana(int totalCost, CallbackInfoReturnable<Boolean> cir) {
+    private void netsourcecasting$enoughMana(int totalCost, CallbackInfoReturnable<Boolean> cir) {
         if (Boolean.TRUE.equals(cir.getReturnValue())) {
             return;
         }
@@ -66,7 +66,7 @@ public abstract class LivingCasterMixin {
             return;
         }
 
-        long needed = mesourcecasting$sourceNeeded(totalCost, mana.getCurrentMana());
+        long needed = netsourcecasting$sourceNeeded(totalCost, mana.getCurrentMana());
         if (needed <= 0L) {
             return;
         }
@@ -86,8 +86,8 @@ public abstract class LivingCasterMixin {
             return;
         }
         // TODO(临时诊断，验证通过后删除)
-        MESourceCasting.LOGGER.info(
-                "[mesourcecasting-diag] enoughMana 判定失败: needed={} 来源可取={}",
+        NetworkSourceCasting.LOGGER.info(
+                "[netsourcecasting-diag] enoughMana 判定失败: needed={} 来源可取={}",
                 needed, chain.availableFor(needed));
         if (chain.availableFor(1L) <= 0L) {
             player.displayClientMessage(chain.emptySourceReason(), true);
@@ -109,7 +109,7 @@ public abstract class LivingCasterMixin {
      * 于是玩家先被清空、网络只在玩家见底后才出力，表现为「优先消耗玩家魔力」。
      *
      * <p>要取多少由配置 {@code payment.network_pays_full_cost} 决定（见
-     * {@link #mesourcecasting$sourceNeeded(double, double)}）：默认取整笔花费，网络够用时玩家魔力
+     * {@link #netsourcecasting$sourceNeeded(double, double)}）：默认取整笔花费，网络够用时玩家魔力
      * 一点不掉；关掉后只取缺口。无论哪种，玩家都只付「网络没付掉的那部分」与「自己现有魔力」中的
      * 较小者，因此<b>绝不会透支</b>。
      *
@@ -118,7 +118,7 @@ public abstract class LivingCasterMixin {
      * 避免一次施法出现两条消息。
      */
     @WrapOperation(method = "expendMana", at = @At(value = "INVOKE", target = REMOVE_MANA_CALL))
-    private double mesourcecasting$payFromNetwork(
+    private double netsourcecasting$payFromNetwork(
             IManaCap mana, double totalCost, Operation<Double> original) {
 
         LivingEntity entity = ((LivingCaster) (Object) this).livingEntity;
@@ -127,7 +127,7 @@ public abstract class LivingCasterMixin {
         }
 
         double playerMana = mana.getCurrentMana();
-        long needed = mesourcecasting$sourceNeeded(totalCost, playerMana);
+        long needed = netsourcecasting$sourceNeeded(totalCost, playerMana);
         if (needed <= 0L) {
             // 按配置本次不需要网络参与：整笔走玩家，与 Ars Nouveau 原版行为一致。
             return original.call(mana, totalCost);
@@ -142,10 +142,10 @@ public abstract class LivingCasterMixin {
         // 网络付剩下的部分归玩家；玩家只可能付自己已有的魔力（宁可少付也不透支）。
         double playerPays = Math.min(playerMana, Math.max(0.0D, totalCost - paidByNetwork));
         // TODO(临时诊断，验证通过后删除)
-        MESourceCasting.LOGGER.info(
-                "[mesourcecasting-diag] totalCost={} playerMana={} needed={} paidByNetwork={} playerPays={} 付整笔={}",
+        NetworkSourceCasting.LOGGER.info(
+                "[netsourcecasting-diag] totalCost={} playerMana={} needed={} paidByNetwork={} playerPays={} 付整笔={}",
                 totalCost, playerMana, needed, paidByNetwork, playerPays,
-                MESourceCastingConfig.NETWORK_PAYS_FULL_COST.get());
+                NetworkSourceCastingConfig.NETWORK_PAYS_FULL_COST.get());
         return original.call(mana, playerPays);
     }
 
@@ -162,8 +162,8 @@ public abstract class LivingCasterMixin {
      *
      * @return 需要从网络取出的魔源量；{@code 0} 表示本次不需要网络参与
      */
-    private static long mesourcecasting$sourceNeeded(double totalCost, double playerMana) {
-        double demand = MESourceCastingConfig.NETWORK_PAYS_FULL_COST.get()
+    private static long netsourcecasting$sourceNeeded(double totalCost, double playerMana) {
+        double demand = NetworkSourceCastingConfig.NETWORK_PAYS_FULL_COST.get()
                 ? totalCost
                 : totalCost - playerMana;
         return SourceCost.fromManaShortfall(demand);

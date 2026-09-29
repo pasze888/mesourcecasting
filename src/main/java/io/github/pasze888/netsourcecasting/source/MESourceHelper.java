@@ -1,4 +1,4 @@
-package io.github.pasze888.mesourcecasting.source;
+package io.github.pasze888.netsourcecasting.source;
 
 import appeng.api.config.Actionable;
 import appeng.api.features.GridLinkables;
@@ -7,7 +7,7 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.storage.StorageHelper;
 import appeng.items.tools.powered.WirelessTerminalItem;
 import gripe._90.arseng.me.key.SourceKey;
-import io.github.pasze888.mesourcecasting.MESourceCasting;
+import io.github.pasze888.netsourcecasting.NetworkSourceCasting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  */
 public final class MESourceHelper {
 
-    private static final String LANG_PREFIX = "message.mesourcecasting.";
+    private static final String LANG_PREFIX = "message.netsourcecasting.";
 
     /** 有终端但尚未与无线接入点绑定。 */
     public static final String MSG_TERMINAL_NOT_LINKED = LANG_PREFIX + "terminal_not_linked";
@@ -162,6 +162,6 @@ public final class MESourceHelper {
 
     /** 本模组命名空间下的资源 ID。 */
     public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MESourceCasting.MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(NetworkSourceCasting.MODID, path);
     }
 }

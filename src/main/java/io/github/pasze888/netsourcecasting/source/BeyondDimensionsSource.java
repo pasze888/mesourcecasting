@@ -1,4 +1,4 @@
-package io.github.pasze888.mesourcecasting.source;
+package io.github.pasze888.netsourcecasting.source;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
@@ -26,10 +26,10 @@ public final class BeyondDimensionsSource implements SourceProvider {
     public static final String MODID = "beyonddimensions";
 
     /** 玩家没有主维度网络时的提示键。 */
-    public static final String MSG_NO_PRIMARY_NET = "message.mesourcecasting.bd_no_primary_net";
+    public static final String MSG_NO_PRIMARY_NET = "message.netsourcecasting.bd_no_primary_net";
 
     /** 主维度网络里没有魔源时的提示键。 */
-    public static final String MSG_NO_SOURCE = "message.mesourcecasting.bd_no_source";
+    public static final String MSG_NO_SOURCE = "message.netsourcecasting.bd_no_source";
 
     /** 魔源在维度网络中的资源键，与超越维度 {@code SourceStackKey.ID} 一致。 */
     private static final ResourceLocation SOURCE_KEY_ID =

@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8.5",
-  "package": "io.github.pasze888.mesourcecasting.mixin",
+  "package": "io.github.pasze888.netsourcecasting.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "LivingCasterMixin"

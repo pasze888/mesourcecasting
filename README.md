@@ -1,9 +1,9 @@
-# ME Source Casting
+# Network Source Casting
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 Let Ars Nouveau spells pay their cost from **the Source stored in your storage networks** — an add-on
-for Ars Nouveau × Applied Energistics 2 × Ars Énergistique, with optional Beyond Dimensions support.
+for Ars Nouveau that hooks into Applied Energistics 2 or Beyond Dimensions (either one is enough).
 
 ## Overview
 
@@ -36,7 +36,7 @@ and stays silent while casting. With both installed, `sources.me_first` decides 
 ## Installation
 
 1. Install the required mods listed above.
-2. Put `mesourcecasting-<version>.jar` into your `mods/` folder.
+2. Put `netsourcecasting-<version>.jar` into your `mods/` folder.
 
 ## Quick start
 
@@ -50,7 +50,7 @@ as your **primary** one in the Primary Network Switcher, and feed Source in thro
 
 ## Configuration
 
-`config/mesourcecasting-common.toml` (a common config, read by both client and server; it is not
+`config/netsourcecasting-common.toml` (a common config, read by both client and server; it is not
 synced over the network):
 
 | Key | Default | Meaning |

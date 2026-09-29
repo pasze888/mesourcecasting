@@ -1,6 +1,6 @@
-package io.github.pasze888.mesourcecasting.source;
+package io.github.pasze888.netsourcecasting.source;
 
-import io.github.pasze888.mesourcecasting.MESourceCastingConfig;
+import io.github.pasze888.netsourcecasting.NetworkSourceCastingConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
@@ -27,7 +27,7 @@ import java.util.List;
 public final class SourceChain {
 
     /** 至少装了一条通道、但两路来源都不可用时的提示键：这种情况提哪一路都不合适。 */
-    private static final String MSG_NO_SOURCE_AVAILABLE = "message.mesourcecasting.no_source_available";
+    private static final String MSG_NO_SOURCE_AVAILABLE = "message.netsourcecasting.no_source_available";
 
     /** ME 那一路需要的两个模组：AE2 提供网络，Ars Énergistique 提供魔源键 {@code arseng:source}。 */
     private static final String AE2_MODID = "ae2";
@@ -61,7 +61,7 @@ public final class SourceChain {
         List<SourceProvider> providers = new ArrayList<>(2);
         List<Component> reasons = new ArrayList<>(2);
 
-        if (MESourceCastingConfig.ME_FIRST.get()) {
+        if (NetworkSourceCastingConfig.ME_FIRST.get()) {
             addMe(player, meInstalled, providers, reasons);
             addBeyondDimensions(player, bdInstalled, providers, reasons);
         } else {

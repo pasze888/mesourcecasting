@@ -1,4 +1,4 @@
-package io.github.pasze888.mesourcecasting.source;
+package io.github.pasze888.netsourcecasting.source;
 
 /**
  * 魔力与魔源之间的换算。

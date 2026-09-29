@@ -1,9 +1,9 @@
-# ME 魔源施法
+# 网络魔源施法
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-让 Ars Nouveau 施法时**直接消耗存储网络中的魔源**——基于 Ars Nouveau、Applied Energistics 2 与
-Ars Énergistique 的联动模组；安装超越维度后，其「维度网络」里的魔源同样可用。
+让 Ars Nouveau 施法时**直接消耗存储网络中的魔源**——围绕 Ars Nouveau 的联动模组，
+接入 Applied Energistics 2 或超越维度（Beyond Dimensions）任意一条即可。
 
 ## 简介
 
@@ -33,7 +33,7 @@ Ars Énergistique 的联动模组；安装超越维度后，其「维度网络�
 ## 安装
 
 1. 安装上面列出的必需模组。
-2. 把 `mesourcecasting-<版本>.jar` 放进 `mods/` 目录。
+2. 把 `netsourcecasting-<版本>.jar` 放进 `mods/` 目录。
 
 ## 快速开始
 
@@ -46,7 +46,7 @@ Ars Énergistique 的联动模组；安装超越维度后，其「维度网络�
 
 ## 配置
 
-`config/mesourcecasting-common.toml`（通用配置，客户端与服务端各自读取，不跨网络同步）：
+`config/netsourcecasting-common.toml`（通用配置，客户端与服务端各自读取，不跨网络同步）：
 
 | 键 | 默认 | 含义 |
 |---|---|---|
