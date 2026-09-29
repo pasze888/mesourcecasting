@@ -5,8 +5,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 /**
  * 本模组的通用配置（{@code config/mesourcecasting-common.toml}）。
  *
- * <p>只有一个开关，用来决定 ME 网络参与施法扣费的程度。两种语义都能自洽，区别只在「网络够用时
- * 玩家还要不要出魔力」，因此交给玩家自己选，而不是替他拍板。
+ * <p>一个开关决定网络参与施法扣费的程度，另一个决定 ME 网络与超越维度「维度网络」谁先出。
+ * 两者各有自洽的语义，区别只在玩家自己的偏好，因此交给玩家选，而不是替他拍板。
  *
  * <p>配置于 {@code FMLCommonSetupEvent} 之前加载完成，而施法发生在游戏运行期，故
  * {@link #NETWORK_PAYS_FULL_COST} 在 {@code expendMana} / {@code enoughMana} 里读取是安全的。
@@ -25,6 +25,14 @@ public final class MESourceCastingConfig {
      */
     public static final ModConfigSpec.BooleanValue NETWORK_PAYS_FULL_COST;
 
+    /**
+     * {@code true}（默认）：先花 ME 网络里的魔源，不够才动超越维度的「维度网络」。
+     *
+     * <p>{@code false}：反过来，先花维度网络里的魔源，不够才动 ME 网络。
+     * 未安装超越维度时该项无效果。
+     */
+    public static final ModConfigSpec.BooleanValue ME_FIRST;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -39,6 +47,19 @@ public final class MESourceCastingConfig {
                         "两种设置下，网络与玩家魔力加起来仍不足以支付时都不会施法。")
                 .translation("mesourcecasting.config.network_pays_full_cost")
                 .define("network_pays_full_cost", true);
+
+        builder.pop();
+
+        builder.comment("魔源来源的优先顺序")
+                .push("sources");
+
+        ME_FIRST = builder
+                .comment(
+                        "true（默认）：先花 ME 网络里的魔源，不够才动超越维度的「维度网络」。",
+                        "false：反过来，先花维度网络里的魔源，不够才动 ME 网络。",
+                        "未安装超越维度时该项无效果。")
+                .translation("mesourcecasting.config.me_first")
+                .define("me_first", true);
 
         builder.pop();
 

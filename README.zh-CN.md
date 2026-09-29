@@ -2,8 +2,8 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-让 Ars Nouveau 施法时**直接消耗 ME 网络中的魔源**——基于 Ars Nouveau、Applied Energistics 2 与
-Ars Énergistique 的联动模组。
+让 Ars Nouveau 施法时**直接消耗存储网络中的魔源**——基于 Ars Nouveau、Applied Energistics 2 与
+Ars Énergistique 的联动模组；安装超越维度后，其「维度网络」里的魔源同样可用。
 
 ## 简介
 
@@ -11,6 +11,10 @@ Ars Énergistique 的联动模组。
 终端都认），施法时 Ars Nouveau 的魔力将**优先由 ME 网络中的魔源支付**；网络补不上的部分才扣玩家自身魔力。
 
 魔源存放在网络里的 **ME 魔源存储元件 / ME 魔源罐**中（由 Ars Énergistique 提供）。
+
+安装**超越维度**（Beyond Dimensions）后，玩家**主维度网络**里的魔源同样能当魔力用——魔源经
+**维度魔源通道**导入网络即可，不必先建 ME 网络。两路来源的先后由配置 `sources.me_first` 决定，
+默认 ME 网络优先。
 
 本模组是**纯行为模组**：不注册任何物品、方块、GUI、配方。
 
@@ -22,6 +26,7 @@ Ars Énergistique 的联动模组。
 | 必需 | Applied Energistics 2 ≥ 19.2.0 | 无线终端绑定与 ME 存储网络 |
 | 必需 | Ars Énergistique ≥ 2.1.0 | ME 网络魔源键 `arseng:source` 的注册者，**不可省略** |
 | 可选 | AE2 Wireless Terminals ≥ 19.2.0 | 其注册的终端同样可被识别；不装不影响功能 |
+| 可选 | Beyond Dimensions ≥ 0.7.0 | 其「维度网络」里的魔源同样可用；不装则只有 ME 一路来源 |
 
 「直接消耗 AE2 里的魔源」这一前提完全由 Ars Énergistique 提供，因此它是硬依赖：
 若没有它，ME 网络里根本不存在魔源这种资源。
@@ -37,6 +42,9 @@ Ars Énergistique 的联动模组。
 2. 确保网络里有魔源存储（ME 魔源存储元件 / ME 魔源罐）。
 3. 施法——网络优先支付，网络补不上的部分才扣玩家自身魔力。
 
+想用超越维度「维度网络」里的魔源，另需安装它：创建维度网络后**不必**把网络接到 ME 上，
+在主网络切换器里把它设为主网络，再用**维度魔源通道**把魔源导入网络即可——施法花的就是主网络里的魔源。
+
 ## 配置
 
 `config/mesourcecasting-common.toml`（通用配置，客户端与服务端各自读取，不跨网络同步）：
@@ -44,6 +52,7 @@ Ars Énergistique 的联动模组。
 | 键 | 默认 | 含义 |
 |---|---|---|
 | `payment.network_pays_full_cost` | `true` | `true`：网络优先付**整笔**花费——网络里的魔源够用时，施法完全不消耗玩家自身魔力<br>`false`：网络只补**缺口**——玩家魔力先照常扣，只有玩家付不起的部分才由网络承担；玩家魔力够付整笔时网络一点不动 |
+| `sources.me_first` | `true` | `true`：先花 ME 网络里的魔源，不够才动维度网络<br>`false`：反过来，先花维度网络里的魔源，不够才动 ME 网络<br>未安装超越维度时该项无效果 |
 
 两种设置下，「网络与玩家魔力加起来仍不足 → 不施法」这条都成立。
 
@@ -64,6 +73,7 @@ Ars Énergistique 的联动模组。
 
 - [付费模型与行为](docs/design/payment-model.md)
 - [法术扣费接管点](docs/design/mixin-interception.md)
+- [超越维度联动](docs/design/beyond-dimensions.md)
 - [环境与构建坑](docs/troubleshooting.md)
 
 ## 许可

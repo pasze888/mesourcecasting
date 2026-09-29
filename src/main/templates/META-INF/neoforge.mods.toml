@@ -30,11 +30,14 @@ authors="${mod_authors}"
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-施法时直接消耗 ME 网络中的魔源。
+施法时直接消耗存储网络中的魔源。
 
 携带任意一台已与无线接入点绑定的 AE2 无线终端（AE2 原生或 AE2WTLib 等附属添加的均可），
 施法时 Ars Nouveau 的魔力将优先由 ME 网络中的魔源支付，网络补不上的部分才扣玩家自身魔力。
 魔源需要存放在网络中的 ME 魔源存储元件里（由 Ars Énergistique 提供）。
+
+安装超越维度（Beyond Dimensions）后，其「维度网络」里的魔源同样可用，玩家用主网络切换器
+选定网络即可；两个来源的先后顺序由配置 sources.me_first 决定。
 '''
 
 # 声明 Mixin 配置，FML 才能加载它
@@ -85,5 +88,13 @@ config="${mod_id}.mixins.json"
     modId="ae2wtlib"
     type="optional"
     versionRange="[19.2.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# 可选依赖：超越维度 —— 装了它，玩家主「维度网络」中的魔源也能当魔力用
+[[dependencies.${mod_id}]]
+    modId="beyonddimensions"
+    type="optional"
+    versionRange="[0.7.0,)"
     ordering="AFTER"
     side="BOTH"

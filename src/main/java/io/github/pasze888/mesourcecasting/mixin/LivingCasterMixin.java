@@ -1,7 +1,5 @@
 package io.github.pasze888.mesourcecasting.mixin;
 
-import appeng.api.config.Actionable;
-import appeng.api.networking.IGrid;
 import com.hollingsworth.arsnouveau.api.mana.IManaCap;
 import com.hollingsworth.arsnouveau.api.spell.wrapped_caster.LivingCaster;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
@@ -10,7 +8,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.pasze888.mesourcecasting.MESourceCasting;
 import io.github.pasze888.mesourcecasting.MESourceCastingConfig;
 import io.github.pasze888.mesourcecasting.source.MESourceHelper;
-import net.minecraft.network.chat.Component;
+import io.github.pasze888.mesourcecasting.source.SourceChain;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,10 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
- * 让 Ars Nouveau 的施法把 ME 网络魔源当作魔力来源。
+ * 让 Ars Nouveau 的施法把来源链里的魔源当作魔力来源。
  *
  * <p>为什么必须 Mixin 而不是用事件：关键不在「事件有没有触发」，而在 <b>事件挂不到判定与扣费上</b>。
  * {@code SpellCostCalcEvent.Pre} 只在 {@code SpellResolver.getResolveCost()} 里触发，
@@ -50,10 +46,10 @@ public abstract class LivingCasterMixin {
             "Lcom/hollingsworth/arsnouveau/api/mana/IManaCap;removeMana(D)D";
 
     /**
-     * 施法前的「魔力是否足够」判定：把 ME 网络可提供的魔源一并计入，并给出失败提示。
+     * 施法前的「魔力是否足够」判定：把来源链可提供的魔源一并计入，并给出失败提示。
      *
      * <p>原逻辑只看玩家自身魔力（{@code totalCost <= mana.getCurrentMana()}），
-     * 这里改为「网络可提供魔源 >= 玩家魔力缺口」。非玩家实体、没有魔力能力值、
+     * 这里改为「来源链可提供魔源 >= 玩家魔力缺口」。非玩家实体、没有魔力能力值、
      * 或玩家魔力本来就够时，一律原样返回。
      */
     @Inject(method = "enoughMana", at = @At("RETURN"), cancellable = true)
@@ -77,25 +73,26 @@ public abstract class LivingCasterMixin {
 
         // 只模拟不实扣：判定阶段可能被探测多次，或被后续事件取消。
         // 模拟量与扣费阶段实际要取的量保持一致，避免判定按 Long.MAX_VALUE、扣费按缺口这种不一致。
-        AtomicReference<Component> errorOut = new AtomicReference<>();
-        IGrid grid = MESourceHelper.findGrid(player, errorOut::set);
-        if (grid == null) {
-            mesourcecasting$reportNoNetwork(player, errorOut.get());
+        SourceChain chain = SourceChain.resolve(player);
+        if (chain.isEmpty()) {
+            player.displayClientMessage(chain.unavailableReason(), true);
             return;
         }
-        if (MESourceHelper.extractSource(grid, player, needed, Actionable.SIMULATE) >= needed) {
+        if (chain.availableFor(needed) >= needed) {
             cir.setReturnValue(true);
             return;
         }
         // TODO(临时诊断，验证通过后删除)
         MESourceCasting.LOGGER.info(
-                "[mesourcecasting-diag] enoughMana 判定失败: needed={} 网络可取={}",
-                needed, MESourceHelper.extractSource(grid, player, needed, Actionable.SIMULATE));
-        mesourcecasting$reportNoSource(player, grid);
+                "[mesourcecasting-diag] enoughMana 判定失败: needed={} 来源可取={}",
+                needed, chain.availableFor(needed));
+        if (chain.availableFor(1L) <= 0L) {
+            player.displayClientMessage(chain.emptySourceReason(), true);
+        }
     }
 
     /**
-     * 扣费：把原版「全额扣玩家魔力」改成「ME 网络魔源优先支付，网络付不掉的部分才扣玩家魔力」。
+     * 扣费：把原版「全额扣玩家魔力」改成「来源链魔源优先支付，付不掉的部分才扣玩家魔力」。
      *
      * <p>用 {@code @WrapOperation} 精确替换 {@code expendMana} 里那一行
      * {@code mana.removeMana(totalCost)}，而不是 {@code @Inject} + {@code @Local} 捕获局部变量。
@@ -134,9 +131,9 @@ public abstract class LivingCasterMixin {
         }
 
         long paidByNetwork = 0L;
-        IGrid grid = MESourceHelper.findGrid(player, null);
-        if (grid != null) {
-            paidByNetwork = MESourceHelper.extractSource(grid, player, needed, Actionable.MODULATE);
+        SourceChain chain = SourceChain.resolve(player);
+        if (!chain.isEmpty()) {
+            paidByNetwork = chain.extract(needed);
         }
 
         // 网络付剩下的部分归玩家；玩家只可能付自己已有的魔力（宁可少付也不透支）。
@@ -167,28 +164,5 @@ public abstract class LivingCasterMixin {
                 ? totalCost
                 : totalCost - playerMana;
         return MESourceHelper.toSourceAmount(demand);
-    }
-
-    /** 没有可用的 ME 网络：区分「没绑定」与「绑定的接入点已不在」两种情况提示。 */
-    private static void mesourcecasting$reportNoNetwork(ServerPlayer player, Component reason) {
-        if (reason != null) {
-            player.displayClientMessage(reason, true);
-            return;
-        }
-        if (!MESourceHelper.hasLinkedTerminal(player)) {
-            player.displayClientMessage(
-                    MESourceHelper.message(MESourceHelper.MSG_TERMINAL_NOT_LINKED), true);
-        } else {
-            player.displayClientMessage(
-                    MESourceHelper.message(MESourceHelper.MSG_NETWORK_NOT_FOUND), true);
-        }
-    }
-
-    /** 网络可达但魔源不够：若该网络根本没有魔源存储，额外说明一句。 */
-    private static void mesourcecasting$reportNoSource(ServerPlayer player, IGrid grid) {
-        if (MESourceHelper.extractSource(grid, player, 1L, Actionable.SIMULATE) <= 0L) {
-            player.displayClientMessage(
-                    MESourceHelper.message(MESourceHelper.MSG_NO_SOURCE_STORAGE), true);
-        }
     }
 }

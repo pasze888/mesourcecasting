@@ -7,10 +7,10 @@
 
 Mixin 目标是 Ars Nouveau 的 `api/spell/wrapped_caster/LivingCaster`：
 
-- `enoughMana(int)` —— 在返回 `false` 时补判「玩家魔力 + 网络可补魔源 ≥ 花费」，够则改为 `true`；
+- `enoughMana(int)` —— 在返回 `false` 时补判「玩家魔力 + 来源链可补魔源 ≥ 花费」，够则改为 `true`；
   **只做模拟不实扣**（该判定会被 `SpellBow` 探测多次，实扣会重复扣源）
 - `expendMana(int)` 内的 `mana.removeMana(totalCost)` —— 用 `@WrapOperation` 精确替换：先算魔力缺口并
-  从网络抽取对应魔源，再让玩家只付自己付得起的那部分；**网络抽取必须发生在扣玩家魔力之前**，
+  从来源链抽取对应魔源，再让玩家只付自己付得起的那部分；**网络抽取必须发生在扣玩家魔力之前**，
   否则玩家魔力会先被扣空、网络只在见底后才出力，表现为「优先消耗玩家魔力」
 
 ## 为什么必须 Mixin 而不是用事件
@@ -39,6 +39,20 @@ Mixin 目标是 Ars Nouveau 的 `api/spell/wrapped_caster/LivingCaster`：
 
 结论：唯一稳定的接管点就是 `LivingCaster` 的 `enoughMana` / `expendMana` 这一对方法。
 
+## 来源链
+
+`source.SourceChain` 把「这一次施法能从哪里取魔源」解析成一条有序链：按 `sources.me_first`
+的顺序依次尝试 ME 网络与超越维度的维度网络，不可用的来源被跳过并记下原因。
+
+判定与扣费都必须调 `SourceChain.resolve(player)` 拿到**同一条链、同一个顺序**，再分别用
+`availableFor(...)`（模拟）与 `extract(...)`（实扣）——两处若各算一套，就会出现
+「判定按某个来源通过、扣费时它却取不到」这类不一致。链为空时 `unavailableReason()` 给出失败提示；
+链非空但一滴都取不出时 `emptySourceReason()` 用链首来源的说法。
+
+来源链只负责编排，具体存取交给各 `SourceProvider`：ME 那一路沿用 AE2 标准写法
+`StorageHelper.poweredExtraction`（同时受网络可用能量与魔源储量约束，动作源用
+`IActionSource.ofPlayer(player)`），维度网络那一路走超越维度的 `UnifiedStorage.extract(...)`。
+
 ## 与 Ars Nouveau 原生时序的关系
 
 Ars Nouveau 的原生顺序是**预检 → 结算效果 → 扣费**，三段分明：
@@ -53,13 +67,10 @@ if (canCast(caster) && !postEvent().isCanceled()) {    // 预检：不够就 ret
 }
 ```
 
-本模组**沿用同一顺序、同一分段**，只是把「Player mana 池」换成「可抽的 ME 网络魔源 + 玩家魔力」：
+本模组**沿用同一顺序、同一分段**，只是把「Player mana 池」换成「可抽的来源链魔源 + 玩家魔力」：
 `enoughMana` 对应预检，`expendMana` 对应扣费。
 
 Ars Nouveau 自身在预检与扣费之间**不重新校验**，因此存在一个固有的时序差；本模组继承了这个特性，
 并叠加了一个 ArS 没有的边界：ArS 扣的是玩家自己的魔力池（同一 tick 内不会被第三方抽干），
 而魔源来自**可被其它设备并发取用**的网络，所以「预检通过、扣费时已不够」在理论上可达。
 处理方式与 Ars Nouveau 一致——取消本次扣费，玩家魔力不受损失；差别只在被保住的是网络魔源而非魔力。
-
-网络侧抽取沿用 AE2 标准写法 `StorageHelper.poweredExtraction`（同时受网络可用能量与魔源储量
-约束），动作源用 `IActionSource.ofPlayer(player)`。
