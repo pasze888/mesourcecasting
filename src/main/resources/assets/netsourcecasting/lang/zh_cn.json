@@ -11,7 +11,7 @@
   "netsourcecasting.page.intro": "网络魔源施法",
   "netsourcecasting.page.intro.text": "施法花费可以不再使用你自己的魔力支付，而是由存储网络里的魔源支付。\n带上任意一台已绑定 ME 无线接入点的 AE2 无线终端，或者加入一个「维度网络」并把它设为主网络，施法时就会优先从这些网络里扣魔源；网络补不上的部分才会使用你自己的魔力。\n两条模组至少装一个。一个都没装时本模组不起作用，施法行为与 Ars Nouveau 原版完全一致。",
   "netsourcecasting.page.me_network": "用 ME 网络支付",
-  "netsourcecasting.page.me_network.text": "需要同时安装 Applied Energistics 2 与 Ars Énergistique，并把魔源存进网络。\n先把 AE2 无线终端放进 ME 无线接入点完成配对，再在网络里存入魔源，之后施法即由网络支付。绑定一次即可，不需要待在接入点旁边。\n网络里没有魔源时整笔花费仍由你自己的魔力承担。",
+  "netsourcecasting.page.me_network.text": "需要同时安装 Applied Energistics 2 与 Ars Énergistique，将魔源存储元件插入驱动器。\n先把 AE2 无线终端放进 ME 无线接入点完成配对，再在网络里存入魔源，之后施法即由网络支付。绑定一次即可，不需要待在接入点旁边。\n网络里没有魔源时整笔花费仍由你自己的魔力承担。",
   "netsourcecasting.page.dimension_network": "用维度网络支付",
   "netsourcecasting.page.dimension_network.text": "需要安装超越维度（Beyond Dimensions）。\n先创建维度网络，并在「主网络切换器」里把它设为你的主网络，再用维度魔源通道把魔源导入网络，之后施法即由该网络支付。\n只认你的主网络：不属于任何网络、或没有设主网络时，施法消耗仍由你自己承担。",
   "netsourcecasting.page.config": "配置",
