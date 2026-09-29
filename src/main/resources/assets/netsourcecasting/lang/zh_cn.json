@@ -1,19 +1,19 @@
 {
   "message.netsourcecasting.terminal_not_linked": "未找到已绑定的无线终端：请把无线终端放入 ME 无线接入点完成配对。",
   "message.netsourcecasting.network_not_found": "找不到终端绑定的 ME 网络：接入点可能已被拆除或所在区块未加载。",
-  "message.netsourcecasting.no_source_storage": "此 ME 网络中没有魔源存储：请放入 ME 魔源元件或 ME 魔源罐。",
+  "message.netsourcecasting.no_source_storage": "此 ME 网络中没有魔源：请放入 ME 魔源存储元件。",
   "message.netsourcecasting.bd_no_primary_net": "没有主维度网络：请先创建维度网络，并在主网络切换器中选中它。",
   "message.netsourcecasting.bd_no_source": "此维度网络中没有魔源：请通过维度魔源通道把魔源导入网络。",
   "message.netsourcecasting.no_source_available": "没有可用的魔源来源：请绑定 ME 无线终端，或加入并选中一个维度网络。",
-  "netsourcecasting.config.network_pays_full_cost": "网络支付整笔花费",
+  "netsourcecasting.config.network_pays_full_cost": "网络优先支付整笔花费",
   "netsourcecasting.config.me_first": "ME 网络优先支付",
   "netsourcecasting.section.guide": "网络魔源施法",
   "netsourcecasting.page.intro": "网络魔源施法",
-  "netsourcecasting.page.intro.text": "施法花费可以不再从你自己身上出，而由存储网络里的魔源支付。\n\n带上任意一台已绑定 ME 无线接入点的 AE2 无线终端，或者加入一个「维度网络」并把它设为主网络，施法时就会优先从这些网络里扣魔源；网络补不上的部分才回落你自己的魔力。\n\n两条通道至少装一条。一条都没装时本模组不介入，施法行为与 Ars Nouveau 原版完全一致。",
+  "netsourcecasting.page.intro.text": "施法花费可以不再使用你自己的魔力支付，而是由存储网络里的魔源支付。\n带上任意一台已绑定 ME 无线接入点的 AE2 无线终端，或者加入一个「维度网络」并把它设为主网络，施法时就会优先从这些网络里扣魔源；网络补不上的部分才会使用你自己的魔力。\n两条模组至少装一个。一个都没装时本模组不起作用，施法行为与 Ars Nouveau 原版完全一致。",
   "netsourcecasting.page.me_network": "用 ME 网络支付",
-  "netsourcecasting.page.me_network.text": "需要同时安装 Applied Energistics 2 与 Ars Énergistique，并把魔源存进网络。\n\n1. 把 AE2 无线终端放进 ME 无线接入点完成配对；\n2. 在网络里放入 ME 魔源存储元件或 ME 魔源罐；\n3. 之后施法即由网络支付。绑定一次即可，不需要待在接入点旁边。\n\n网络里没有魔源时不会扣除任何东西，整笔花费仍由你自己的魔力承担。",
+  "netsourcecasting.page.me_network.text": "需要同时安装 Applied Energistics 2 与 Ars Énergistique，并把魔源存进网络。\n先把 AE2 无线终端放进 ME 无线接入点完成配对，再在网络里放入 ME 魔源存储元件，之后施法即由网络支付。绑定一次即可，不需要待在接入点旁边。\n网络里没有魔源时整笔花费仍由你自己的魔力承担。",
   "netsourcecasting.page.dimension_network": "用维度网络支付",
-  "netsourcecasting.page.dimension_network.text": "需要安装超越维度（Beyond Dimensions）。\n\n1. 创建维度网络，并在「主网络切换器」里把它设为你的主网络；\n2. 用维度魔源通道把魔源导入网络；\n3. 之后施法即由该网络支付——不必建 ME 网络，也不必接 AE2。\n\n只认你的主网络：不属于任何网络、或没有设主网络时，这一路不参与。",
+  "netsourcecasting.page.dimension_network.text": "需要安装超越维度（Beyond Dimensions）。\n先创建维度网络，并在「主网络切换器」里把它设为你的主网络，再用维度魔源通道把魔源导入网络，之后施法即由该网络支付。\n只认你的主网络：不属于任何网络、或没有设主网络时，施法消耗仍由你自己承担。",
   "netsourcecasting.page.config": "配置",
-  "netsourcecasting.page.config.text": "config/netsourcecasting-common.toml\n\npayment.network_pays_full_cost（默认 true）\n  true——网络里的魔源够用时，施法完全不消耗你自己的魔力；\n  false——你的魔力先照常扣，只有付不起的部分才由网络承担。\n\nsources.me_first（默认 true）\n  true——先花 ME 网络里的魔源，不够才动维度网络；\n  false——反过来。\n  未安装超越维度时该项无效果。"
+  "netsourcecasting.page.config.text": "payment.network_pays_full_cost（默认 true）\n  true——网络里的魔源够用时，施法完全不消耗你自己的魔力；\n  false——你的魔力先照常扣，只有付不起的部分才由网络承担。\nsources.me_first（默认 true）\n  true——先花 ME 网络里的魔源，不够才动维度网络；\n  false——反过来。\n  未安装超越维度时该项无效果。"
 }
