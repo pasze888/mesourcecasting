@@ -1,7 +1,7 @@
 {
   "message.netsourcecasting.terminal_not_linked": "No linked wireless terminal: pair one in an ME Wireless Access Point.",
   "message.netsourcecasting.network_not_found": "The ME network linked by your terminal cannot be found: the access point may have been removed or its chunk is not loaded.",
-  "message.netsourcecasting.no_source_storage": "This ME network holds no Source: add an ME Source Storage Component.",
+  "message.netsourcecasting.no_source_storage": "No Source in the current network",
   "message.netsourcecasting.bd_no_primary_net": "No primary dimension network: create one and select it in the Primary Network Switcher.",
   "message.netsourcecasting.bd_no_source": "This dimension network holds no Source: feed it in through an Interdimensional Source Pathway.",
   "message.netsourcecasting.no_source_available": "No Source available: bind an ME wireless terminal, or join and select a dimension network.",
