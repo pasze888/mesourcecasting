@@ -138,19 +138,25 @@ dependencies {
     // compileOnly 让这些 mod 的类不进本模组 jar（它们是独立 mod，由加载器提供），
     // localRuntime 让它们出现在开发环境里供 runClient 使用（不进 runtimeClasspath 的发布会传播）。
     //
-    // ── 硬依赖 ───────────────────────────────────────────────────────────────
+    // ── 必需依赖 ─────────────────────────────────────────────────────────────
     // Ars Nouveau 5.13.1：施法方，本模组要 Mixin 它的 LivingCaster。
     compileOnly "curse.maven:ars-nouveau-401955:8721482"
     localRuntime "curse.maven:ars-nouveau-401955:8721482"
 
-    // AE2 19.2.17：无线终端（网格链接）与 ME 存储网络。
+    // ── 来源通道：两组至少装一组，都不装时本模组不介入 ──────────────────────
+    // 通道一 —— AE2 19.2.17 与 Ars Energistique 2.1.1-beta 必须同时在场：
+    // AE2 提供无线终端（网格链接）与 ME 存储网络，Ars Energistique 注册 ME 魔源键 SourceKey。
+    // 缺任意一个，SourceChain 都会跳过 ME 那一路（按 mod id 判断，见其 meChannelInstalled）。
     compileOnly "curse.maven:applied-energistics-2-223794:7027323"
     localRuntime "curse.maven:applied-energistics-2-223794:7027323"
-
-    // Ars Energistique 2.1.1-beta：ME 网络魔源键 SourceKey 的注册者。
-    // 「直接消耗 AE2 里的魔源」这一前提完全由它提供，不可替换。
     compileOnly "curse.maven:ars-energistique-905641:6203425"
     localRuntime "curse.maven:ars-energistique-905641:6203425"
+
+    // 通道二 —— Beyond Dimensions 0.7.30（超越维度）：其「维度网络」里也存魔源。
+    // 本模组只用它的 api 包（DimensionsNet / UnifiedStorage / StackKeyRegistry），
+    // 魔源键按 ID（beyonddimensions:stack_type/source）在注册表里查，不引用其集成模块的类。
+    compileOnly "curse.maven:beyond-dimensions-1222890:8812500"
+    localRuntime "curse.maven:beyond-dimensions-1222890:8812500"
 
     // ── 可选依赖 ─────────────────────────────────────────────────────────────
     // AE2 1.21.1 自带无线终端（appeng.items.tools.powered.WirelessTerminalItem），
@@ -158,13 +164,6 @@ dependencies {
     // 扫描"任何已绑定的无线终端"，AE2WTLib 的终端会自然被覆盖，无需引用其 API。
     // 这里仅放进开发环境，便于同时验证两类终端。
     localRuntime "curse.maven:applied-energistics-2-wireless-terminals-459929:8450398"
-
-    // Beyond Dimensions 0.7.30（超越维度）：其「维度网络」里也存魔源，作为 ME 网络之外的第二个来源。
-    // 与终端一样走 compileOnly + localRuntime —— 不装它时 ME 那条路照常工作，只是少一个来源。
-    // 本模组只用它的 api 包（DimensionsNet / UnifiedStorage / StackKeyRegistry），
-    // 魔源键按 ID（beyonddimensions:stack_type/source）在注册表里查，不引用其集成模块的类。
-    compileOnly "curse.maven:beyond-dimensions-1222890:8812500"
-    localRuntime "curse.maven:beyond-dimensions-1222890:8812500"
 
     // ── 开发期运行时依赖（非本模组依赖，仅为让开发环境能启动）───────────────
     // Ars Nouveau 硬依赖：Curios / GeckoLib / Caelus。

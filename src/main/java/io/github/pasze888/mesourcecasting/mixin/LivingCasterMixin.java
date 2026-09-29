@@ -7,8 +7,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.pasze888.mesourcecasting.MESourceCasting;
 import io.github.pasze888.mesourcecasting.MESourceCastingConfig;
-import io.github.pasze888.mesourcecasting.source.MESourceHelper;
 import io.github.pasze888.mesourcecasting.source.SourceChain;
+import io.github.pasze888.mesourcecasting.source.SourceCost;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -75,7 +75,10 @@ public abstract class LivingCasterMixin {
         // 模拟量与扣费阶段实际要取的量保持一致，避免判定按 Long.MAX_VALUE、扣费按缺口这种不一致。
         SourceChain chain = SourceChain.resolve(player);
         if (chain.isEmpty()) {
-            player.displayClientMessage(chain.unavailableReason(), true);
+            // 一条来源通道都没装时本模组无事可做，静默放行——那不是玩家的配置问题。
+            if (chain.anyChannelInstalled()) {
+                player.displayClientMessage(chain.unavailableReason(), true);
+            }
             return;
         }
         if (chain.availableFor(needed) >= needed) {
@@ -163,6 +166,6 @@ public abstract class LivingCasterMixin {
         double demand = MESourceCastingConfig.NETWORK_PAYS_FULL_COST.get()
                 ? totalCost
                 : totalCost - playerMana;
-        return MESourceHelper.toSourceAmount(demand);
+        return SourceCost.fromManaShortfall(demand);
     }
 }

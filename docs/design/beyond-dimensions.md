@@ -55,6 +55,14 @@ KeyAmount moved = net.getUnifiedStorage().extract(sourceKey, amount, simulate, f
 查到的键会缓存；查不中时不写缓存值，下次调用重查——类型注册发生在 `FMLCommonSetupEvent`，
 而施法在游戏运行期，所以实际只会查中一次。
 
+## 没有 ME 网络时
+
+这一路完全不依赖 AE2：魔源类型由超越维度自己的 Ars 集成模块注册（只需要 Ars Nouveau 在场），
+用到的 `DimensionsNet` / `UnifiedStorage` / `StackKeyRegistry` 全在它的 api 包里。
+
+所以「只装超越维度、不装 AE2」时本模组照常工作——`SourceChain` 会因为缺 AE2 或 Ars Énergistique
+而把 ME 那一路整条跳过，连它的失败原因都不记。
+
 ## 只认主网络
 
 `getPrimaryNetFromPlayer` 而不是 `getAllNetFromPlayer`：一个玩家可能同时属于多个维度网络，

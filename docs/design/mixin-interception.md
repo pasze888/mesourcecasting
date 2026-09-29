@@ -44,6 +44,10 @@ Mixin 目标是 Ars Nouveau 的 `api/spell/wrapped_caster/LivingCaster`：
 `source.SourceChain` 把「这一次施法能从哪里取魔源」解析成一条有序链：按 `sources.me_first`
 的顺序依次尝试 ME 网络与超越维度的维度网络，不可用的来源被跳过并记下原因。
 
+没装的通道（ME 需要 AE2 + Ars Énergistique，维度网络需要超越维度）整条跳过、也不计入失败原因——
+把「没装那个模组」当成玩家的配置问题去提示是错的。两条都没装时链被标记为「没有通道」，调用方
+静默放行，玩家看到的完全是原版行为。
+
 判定与扣费都必须调 `SourceChain.resolve(player)` 拿到**同一条链、同一个顺序**，再分别用
 `availableFor(...)`（模拟）与 `extract(...)`（实扣）——两处若各算一套，就会出现
 「判定按某个来源通过、扣费时它却取不到」这类不一致。链为空时 `unavailableReason()` 给出失败提示；

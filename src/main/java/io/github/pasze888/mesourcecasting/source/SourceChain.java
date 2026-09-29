@@ -1,6 +1,5 @@
 package io.github.pasze888.mesourcecasting.source;
 
-import appeng.api.networking.IGrid;
 import io.github.pasze888.mesourcecasting.MESourceCastingConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,86 +8,96 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 一次施法可用的魔源来源链：按配置的顺序列出能取魔源的地方，并在它们之间分配抽取量。
  *
- * <p><b>判定与扣费必须共用同一条链、同一个顺序</b>（{@link SourceChain#resolve} 的结果），
- * 两处若不一致就会出现「判定通过但扣费时凑不出魔源」。
+ * <p>链上有两条通道，各自是否参与由「装了哪些模组」决定：ME 网络需要 AE2 与 Ars Énergistique
+ * 同时在场（后者提供 ME 魔源键），维度网络需要超越维度。**两条都没装时本模组无事可做**，
+ * 此时 {@link #anyChannelInstalled()} 为假，调用方应当静默放行而不是弹提示——那不是玩家的配置问题。
  *
- * <p>链上各来源的可取量由各自模拟得出，彼此独立；ME 那一路受网络能量约束，模拟与实际之间
+ * <p><b>判定与扣费必须共用同一条链、同一个顺序</b>（{@link #resolve} 的结果），两处若不一致
+ * 就会出现「判定通过但扣费时凑不出魔源」。
+ *
+ * <p>链上各来源的可取量由各自模拟得出，彼此独立；ME 那一路还受网络能量约束，模拟与实际之间
  * 存在固有偏差，因此「预检通过、扣费时已不够」在理论上可达，处理方式与 Ars Nouveau 原生一致：
- * 取不满就让余额回落玩家魔力，够不上就不施法。
+ * 取不满就让余额回落玩家魔力，够不上就不施法。两路来源指向同一个池（ME 里插了超越维度的
+ * 存储元件）时这个偏差会被放大，见 docs/design/payment-model.md。
  */
 public final class SourceChain {
 
-    /** 两路来源都在场却都不可用时的提示键：这种情况提哪一路都不合适。 */
+    /** 至少装了一条通道、但两路来源都不可用时的提示键：这种情况提哪一路都不合适。 */
     private static final String MSG_NO_SOURCE_AVAILABLE = "message.mesourcecasting.no_source_available";
 
+    /** ME 那一路需要的两个模组：AE2 提供网络，Ars Énergistique 提供魔源键 {@code arseng:source}。 */
+    private static final String AE2_MODID = "ae2";
+    private static final String ARSENG_MODID = "arseng";
+
     private final List<SourceProvider> providers;
+    private final boolean anyChannelInstalled;
     private final @Nullable Component unavailableReason;
 
-    private SourceChain(List<SourceProvider> providers, @Nullable Component unavailableReason) {
+    private SourceChain(List<SourceProvider> providers, boolean anyChannelInstalled,
+                        @Nullable Component unavailableReason) {
         this.providers = providers;
+        this.anyChannelInstalled = anyChannelInstalled;
         this.unavailableReason = unavailableReason;
     }
 
     /**
      * 解析玩家当前可用的来源链，顺序由配置 {@code sources.me_first} 决定。
      *
-     * <p>不可用的来源会被跳过并记下原因：整条链都空时，只有一路在场就报那一路的具体原因，
-     * 两路都在场则给一条通用提示（否则玩家会只被告知其中一半）。
+     * <p>没装的那条通道既不参与、也不计入失败原因——否则会把「没装那个模组」说成玩家的配置问题。
+     * 装了却用不了的才记原因：两条通道都在场时给一条通用提示，只剩一条时报它的具体原因。
      */
     public static SourceChain resolve(ServerPlayer player) {
+        boolean meInstalled = meChannelInstalled();
+        boolean bdInstalled = ModList.get().isLoaded(BeyondDimensionsSource.MODID);
+        if (!meInstalled && !bdInstalled) {
+            // 一条通道都没装：本模组对这名玩家无事可做，静默放行。
+            return new SourceChain(List.of(), false, null);
+        }
+
         List<SourceProvider> providers = new ArrayList<>(2);
         List<Component> reasons = new ArrayList<>(2);
 
         if (MESourceCastingConfig.ME_FIRST.get()) {
-            addMe(player, providers, reasons);
-            addBeyondDimensions(player, providers, reasons);
+            addMe(player, meInstalled, providers, reasons);
+            addBeyondDimensions(player, bdInstalled, providers, reasons);
         } else {
-            addBeyondDimensions(player, providers, reasons);
-            addMe(player, providers, reasons);
+            addBeyondDimensions(player, bdInstalled, providers, reasons);
+            addMe(player, meInstalled, providers, reasons);
         }
 
         if (!providers.isEmpty()) {
-            return new SourceChain(List.copyOf(providers), null);
+            return new SourceChain(List.copyOf(providers), true, null);
         }
         Component reason = reasons.size() == 1
                 ? reasons.getFirst()
                 : Component.translatable(MSG_NO_SOURCE_AVAILABLE);
-        return new SourceChain(List.of(), reason);
+        return new SourceChain(List.of(), true, reason);
     }
 
-    private static void addMe(ServerPlayer player,
+    /** ME 那一路是否可用——AE2 与 Ars Énergistique 缺一不可。 */
+    private static boolean meChannelInstalled() {
+        ModList mods = ModList.get();
+        return mods.isLoaded(AE2_MODID) && mods.isLoaded(ARSENG_MODID);
+    }
+
+    private static void addMe(ServerPlayer player, boolean installed,
                               List<SourceProvider> providers, List<Component> reasons) {
-        AtomicReference<Component> terminalError = new AtomicReference<>();
-        IGrid grid = MESourceHelper.findGrid(player, terminalError::set);
-        if (grid != null) {
-            providers.add(new MESourceProvider(grid, player));
+        if (!installed) {
             return;
         }
-        reasons.add(meFailureReason(player, terminalError.get()));
-    }
-
-    /**
-     * ME 一路不可用的原因，口径与原实现一致：优先用 AE2 自己给出的解释，
-     * 其次区分「没有绑定终端」与「绑定了但接入点已不可达」。
-     */
-    private static Component meFailureReason(ServerPlayer player, @Nullable Component terminalError) {
-        if (terminalError != null) {
-            return terminalError;
+        SourceProvider provider = MESourceHelper.resolve(player, reasons::add);
+        if (provider != null) {
+            providers.add(provider);
         }
-        return MESourceHelper.message(MESourceHelper.hasLinkedTerminal(player)
-                ? MESourceHelper.MSG_NETWORK_NOT_FOUND
-                : MESourceHelper.MSG_TERMINAL_NOT_LINKED);
     }
 
-    private static void addBeyondDimensions(ServerPlayer player,
+    private static void addBeyondDimensions(ServerPlayer player, boolean installed,
                                             List<SourceProvider> providers, List<Component> reasons) {
-        if (!ModList.get().isLoaded(BeyondDimensionsSource.MODID)) {
-            // 没装超越维度：这一路不参与，也不会计入失败原因，提示保持改造前的样子。
+        if (!installed) {
             return;
         }
         BeyondDimensionsSource source = BeyondDimensionsSource.ofPrimaryNet(player);
@@ -99,12 +108,17 @@ public final class SourceChain {
         reasons.add(Component.translatable(BeyondDimensionsSource.MSG_NO_PRIMARY_NET));
     }
 
+    /** 至少装了一条来源通道；两条都没装时本模组不该对玩家说话。 */
+    public boolean anyChannelInstalled() {
+        return anyChannelInstalled;
+    }
+
     /** 一路来源都没有。 */
     public boolean isEmpty() {
         return providers.isEmpty();
     }
 
-    /** 没有一路来源可用时给玩家的提示；{@link #isEmpty()} 为假时无意义。 */
+    /** 没有一路来源可用时给玩家的提示；{@link #anyChannelInstalled()} 为假或链非空时无意义。 */
     public Component unavailableReason() {
         return unavailableReason;
     }

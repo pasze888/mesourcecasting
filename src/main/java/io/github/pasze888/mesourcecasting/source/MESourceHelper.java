@@ -12,21 +12,24 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * ME 网络魔源的直通存取。
+ * ME 网络这一路来源的直通存取。
  *
- * <p>魔源在 ME 网络中以 {@link SourceKey} 存储，由 Ars Energistique 注册；网络侧的定量抽取沿用
- * AE2 的标准写法 {@link StorageHelper#poweredExtraction}（同时受网络可用能量与存储量约束）。
+ * <p>本类引用 AE2 与 Ars Énergistique（{@link SourceKey} 由后者注册）的类型，因此<b>只在
+ * {@link SourceChain} 确认这两个模组都在场之后才会被触碰</b>——只装超越维度的玩家根本不会走到这里。
+ * 纯算术的换算见 {@link SourceCost}，也不放在本类。
+ *
+ * <p>魔源在 ME 网络中以 {@link SourceKey} 存储；网络侧的定量抽取沿用 AE2 的标准写法
+ * {@link StorageHelper#poweredExtraction}（同时受网络可用能量与存储量约束）。
  *
  * <p>本模组的语义是「直通网络」：不缓存魔源，每次施法按需现取。
  */
 public final class MESourceHelper {
-
-    /** 1 点魔源折算 1 点 Ars Nouveau 魔力。 */
-    public static final int SOURCE_PER_MANA = 1;
 
     private static final String LANG_PREFIX = "message.mesourcecasting.";
 
@@ -41,18 +44,32 @@ public final class MESourceHelper {
     }
 
     /**
-     * 把「魔力缺口」折算成需要取出的魔源量。
+     * 把玩家背包里第一台可用的无线终端所指的网络包成一路来源。
      *
-     * <p>向上取整：宁可多取一点，也不能因取整让玩家少付而出现负数魔力。
+     * <p>调用方必须先确认 AE2 与 Ars Énergistique 都在场——本类一被触碰就会用到它们的类型。
      *
-     * @param manaShortfall 玩家魔力不足的部分（&le; 0 表示魔力充足，需要 0 魔源）
-     * @return 需要取出的魔源量；魔力充足时返回 {@code 0}
+     * @param reasonOut 找不到时把不可用的原因写入其中
+     * @return 可用的来源；找不到时返回 {@code null}
      */
-    public static long toSourceAmount(double manaShortfall) {
-        if (manaShortfall <= 0.0D) {
-            return 0L;
+    public static @Nullable SourceProvider resolve(ServerPlayer player, Consumer<Component> reasonOut) {
+        AtomicReference<Component> terminalError = new AtomicReference<>();
+        IGrid grid = findGrid(player, terminalError::set);
+        if (grid != null) {
+            return new MESourceProvider(grid, player);
         }
-        return (long) Math.ceil(manaShortfall) * SOURCE_PER_MANA;
+        reasonOut.accept(meFailureReason(player, terminalError.get()));
+        return null;
+    }
+
+    /**
+     * ME 一路不可用的原因：优先用 AE2 自己给出的解释，
+     * 其次区分「没有绑定终端」与「绑定了但接入点已不可达」。
+     */
+    private static Component meFailureReason(ServerPlayer player, @Nullable Component terminalError) {
+        if (terminalError != null) {
+            return terminalError;
+        }
+        return message(hasLinkedTerminal(player) ? MSG_NETWORK_NOT_FOUND : MSG_TERMINAL_NOT_LINKED);
     }
 
     /**

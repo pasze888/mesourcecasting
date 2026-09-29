@@ -32,12 +32,15 @@ authors="${mod_authors}"
 description='''
 施法时直接消耗存储网络中的魔源。
 
-携带任意一台已与无线接入点绑定的 AE2 无线终端（AE2 原生或 AE2WTLib 等附属添加的均可），
-施法时 Ars Nouveau 的魔力将优先由 ME 网络中的魔源支付，网络补不上的部分才扣玩家自身魔力。
-魔源需要存放在网络中的 ME 魔源存储元件里（由 Ars Énergistique 提供）。
+ME 网络：携带任意一台已与无线接入点绑定的 AE2 无线终端（AE2 原生或 AE2WTLib 等附属添加的
+均可），施法时 Ars Nouveau 的魔力将优先由 ME 网络中的魔源支付，网络补不上的部分才扣玩家自身
+魔力。魔源需要存放在网络中的 ME 魔源存储元件里（由 Ars Énergistique 提供）。
 
-安装超越维度（Beyond Dimensions）后，其「维度网络」里的魔源同样可用，玩家用主网络切换器
-选定网络即可；两个来源的先后顺序由配置 sources.me_first 决定。
+维度网络：安装超越维度（Beyond Dimensions）后，其「维度网络」里的魔源同样可用，玩家用主网络
+切换器选定网络即可。
+
+两条通道至少装一条（AE2 + Ars Énergistique，或超越维度）；都不装时本模组不介入。
+两个来源的先后顺序由配置 sources.me_first 决定。
 '''
 
 # 声明 Mixin 配置，FML 才能加载它
@@ -67,18 +70,20 @@ config="${mod_id}.mixins.json"
     ordering="AFTER"
     side="BOTH"
 
-# 硬依赖 2：Applied Energistics 2 —— 无线终端的绑定与 ME 存储网络
+# 来源通道一（与超越维度至少装一条）：ME 网络那一路，需要下面两个模组同时在场。
+# Applied Energistics 2 —— 无线终端的绑定与 ME 存储网络
 [[dependencies.${mod_id}]]
     modId="ae2"
-    type="required"
+    type="optional"
     versionRange="[19.2.0,)"
     ordering="AFTER"
     side="BOTH"
 
-# 硬依赖 3：Ars Énergistique —— ME 网络魔源键（arseng:source）的注册者
+# Ars Énergistique —— ME 网络魔源键（arseng:source）的注册者；它本身是 AE2 附属。
+# 没有它，ME 网络里根本不存在魔源这种资源，这一路也就没有意义。
 [[dependencies.${mod_id}]]
     modId="arseng"
-    type="required"
+    type="optional"
     versionRange="[2.1.0,)"
     ordering="AFTER"
     side="BOTH"

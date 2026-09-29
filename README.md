@@ -26,13 +26,12 @@ This mod is **behaviour-only**: it registers no items, blocks, GUIs or recipes.
 | Type | Mod | Notes |
 |---|---|---|
 | Required | Ars Nouveau ≥ 5.13.0 | The casting side; this mod Mixins its `LivingCaster` |
-| Required | Applied Energistics 2 ≥ 19.2.0 | Wireless terminal binding and the ME storage network |
-| Required | Ars Énergistique ≥ 2.1.0 | Registers the ME network Source key `arseng:source`; **cannot be omitted** |
+| Channel 1 | Applied Energistics 2 ≥ 19.2.0 **+** Ars Énergistique ≥ 2.1.0 | The ME network route; both must be present — AE2 provides the wireless terminal and the storage network, Ars Énergistique registers the ME Source key `arseng:source` |
+| Channel 2 | Beyond Dimensions ≥ 0.7.0 | The dimension network route |
 | Optional | AE2 Wireless Terminals ≥ 19.2.0 | Terminals it registers are recognised too; the feature works without it |
-| Optional | Beyond Dimensions ≥ 0.7.0 | The Source in its dimension network counts too; without it only the ME route is available |
 
-"Source inside AE2" is provided entirely by Ars Énergistique, which is why it is a hard dependency:
-without it, Source does not exist as a resource in an ME network at all.
+At least **one channel** must be installed, otherwise the mod has nothing to do — it registers nothing
+and stays silent while casting. With both installed, `sources.me_first` decides which is spent first.
 
 ## Installation
 
@@ -45,9 +44,9 @@ without it, Source does not exist as a resource in an ME network at all.
 2. Make sure the network has Source storage (ME Source Storage Component / ME Source Jar).
 3. Cast a spell — the network pays first, and only what it cannot cover comes out of your own mana.
 
-To use the Source in a Beyond Dimensions network instead, install it, select that network as your
-primary one in the Primary Network Switcher, and feed Source in through an **Interdimensional Source
-Pathway** — no ME network of your own is needed.
+Beyond Dimensions on its own (no AE2) works too: skip steps 1–2, create a dimension network, select it
+as your **primary** one in the Primary Network Switcher, and feed Source in through an
+**Interdimensional Source Pathway** — no ME network is involved.
 
 ## Configuration
 
