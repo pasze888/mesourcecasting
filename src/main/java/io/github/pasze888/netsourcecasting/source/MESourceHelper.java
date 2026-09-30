@@ -8,14 +8,10 @@ import appeng.api.storage.StorageHelper;
 import appeng.items.tools.powered.WirelessTerminalItem;
 import gripe._90.arseng.me.key.SourceKey;
 import io.github.pasze888.netsourcecasting.NetworkSourceCasting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * ME 网络这一路来源的直通存取。
@@ -31,15 +27,6 @@ import java.util.function.Consumer;
  */
 public final class MESourceHelper {
 
-    private static final String LANG_PREFIX = "message.netsourcecasting.";
-
-    /** 有终端但尚未与无线接入点绑定。 */
-    public static final String MSG_TERMINAL_NOT_LINKED = LANG_PREFIX + "terminal_not_linked";
-    /** 已绑定，但绑定的接入点已不存在（网络被拆或区块未加载）。 */
-    public static final String MSG_NETWORK_NOT_FOUND = LANG_PREFIX + "network_not_found";
-    /** 网络可达，但里面没有魔源存储。 */
-    public static final String MSG_NO_SOURCE_STORAGE = LANG_PREFIX + "no_source_storage";
-
     private MESourceHelper() {
     }
 
@@ -48,28 +35,11 @@ public final class MESourceHelper {
      *
      * <p>调用方必须先确认 AE2 与 Ars Énergistique 都在场——本类一被触碰就会用到它们的类型。
      *
-     * @param reasonOut 找不到时把不可用的原因写入其中
      * @return 可用的来源；找不到时返回 {@code null}
      */
-    public static @Nullable SourceProvider resolve(ServerPlayer player, Consumer<Component> reasonOut) {
-        AtomicReference<Component> terminalError = new AtomicReference<>();
-        IGrid grid = findGrid(player, terminalError::set);
-        if (grid != null) {
-            return new MESourceProvider(grid, player);
-        }
-        reasonOut.accept(meFailureReason(player, terminalError.get()));
-        return null;
-    }
-
-    /**
-     * ME 一路不可用的原因：优先用 AE2 自己给出的解释，
-     * 其次区分「没有绑定终端」与「绑定了但接入点已不可达」。
-     */
-    private static Component meFailureReason(ServerPlayer player, @Nullable Component terminalError) {
-        if (terminalError != null) {
-            return terminalError;
-        }
-        return message(hasLinkedTerminal(player) ? MSG_NETWORK_NOT_FOUND : MSG_TERMINAL_NOT_LINKED);
+    public static @Nullable SourceProvider resolve(ServerPlayer player) {
+        IGrid grid = findGrid(player);
+        return grid == null ? null : new MESourceProvider(grid, player);
     }
 
     /**
@@ -88,10 +58,12 @@ public final class MESourceHelper {
      * <p>这里刻意 <b>不做接入点范围校验</b>：只要终端绑定过接入点、且该接入点方块仍是有效网格节点，
      * 就认为可用（即「绑一次即可用」）。这是本模组的既定设计。
      *
-     * @param errorOut 非空时会把失败原因（未绑定 / 找不到绑定网络）写入其中
+     * <p>失败原因不采集：本模组不发失败提示，判定交还原版报 {@code ars_nouveau.spell.no_mana}，
+     * 因此也不把 AE2 的错误解释（{@code getLinkedGrid} 的 errorConsumer）转给玩家。
+     *
      * @return 可用的 ME 网络；找不到则返回 {@code null}
      */
-    public static IGrid findGrid(ServerPlayer player, Consumer<Component> errorOut) {
+    public static IGrid findGrid(ServerPlayer player) {
         var inventory = player.getInventory();
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             ItemStack stack = inventory.getItem(slot);
@@ -99,32 +71,13 @@ public final class MESourceHelper {
                 continue;
             }
             if (stack.getItem() instanceof WirelessTerminalItem terminal) {
-                IGrid grid = terminal.getLinkedGrid(stack, player.level(), errorOut);
+                IGrid grid = terminal.getLinkedGrid(stack, player.level(), null);
                 if (grid != null) {
                     return grid;
                 }
             }
         }
         return null;
-    }
-
-    /**
-     * 判断玩家是否至少拥有一台「已绑定」的无线终端。
-     *
-     * <p>用于区分失败原因：没有终端 / 有终端但没绑定 / 绑定了但网络不可达，
-     * 这三种情况的提示语不同。
-     */
-    public static boolean hasLinkedTerminal(ServerPlayer player) {
-        var inventory = player.getInventory();
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (isLinkableTerminal(stack)
-                    && stack.getItem() instanceof WirelessTerminalItem terminal
-                    && terminal.getLinkedPosition(stack) != null) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -153,11 +106,6 @@ public final class MESourceHelper {
                 IActionSource.ofPlayer(player),
                 mode);
         return Math.max(extracted, 0L);
-    }
-
-    /** 构造一条可翻译的提示文本。 */
-    public static Component message(String key) {
-        return Component.translatable(key);
     }
 
     /** 本模组命名空间下的资源 ID。 */

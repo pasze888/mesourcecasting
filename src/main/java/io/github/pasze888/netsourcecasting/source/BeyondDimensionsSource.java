@@ -5,7 +5,6 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -24,12 +23,6 @@ public final class BeyondDimensionsSource implements SourceProvider {
 
     /** 超越维度的 mod id，调用方拿它判断模组是否在场。 */
     public static final String MODID = "beyonddimensions";
-
-    /** 玩家没有主维度网络时的提示键。 */
-    public static final String MSG_NO_PRIMARY_NET = "message.netsourcecasting.bd_no_primary_net";
-
-    /** 主维度网络里没有魔源时的提示键。 */
-    public static final String MSG_NO_SOURCE = "message.netsourcecasting.bd_no_source";
 
     /** 魔源在维度网络中的资源键，与超越维度 {@code SourceStackKey.ID} 一致。 */
     private static final ResourceLocation SOURCE_KEY_ID =
@@ -87,10 +80,5 @@ public final class BeyondDimensionsSource implements SourceProvider {
         }
         KeyAmount moved = storage.extract(key, amount, simulate, false);
         return Math.max(moved.amount(), 0L);
-    }
-
-    @Override
-    public Component emptySourceReason() {
-        return Component.translatable(MSG_NO_SOURCE);
     }
 }

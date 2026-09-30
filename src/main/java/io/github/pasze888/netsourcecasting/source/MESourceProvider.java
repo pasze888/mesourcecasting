@@ -2,7 +2,6 @@ package io.github.pasze888.netsourcecasting.source;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.IGrid;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -29,10 +28,5 @@ public final class MESourceProvider implements SourceProvider {
     @Override
     public long extract(long amount) {
         return MESourceHelper.extractSource(grid, player, amount, Actionable.MODULATE);
-    }
-
-    @Override
-    public Component emptySourceReason() {
-        return MESourceHelper.message(MESourceHelper.MSG_NO_SOURCE_STORAGE);
     }
 }

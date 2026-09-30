@@ -30,8 +30,9 @@ This mod is **behaviour-only**: it registers no items, blocks, GUIs or recipes.
 | Channel 2 | Beyond Dimensions ≥ 0.7.0 | The dimension network route |
 | Optional | AE2 Wireless Terminals ≥ 19.2.0 | Terminals it registers are recognised too; the feature works without it |
 
-At least **one channel** must be installed, otherwise the mod has nothing to do — it registers nothing
-and stays silent while casting. With both installed, `sources.me_first` decides which is spent first.
+At least **one channel** must be installed, otherwise the mod has nothing to do — it registers
+nothing and casting behaves exactly like vanilla Ars Nouveau. With both installed,
+`sources.me_first` decides which is spent first.
 
 ## Installation
 

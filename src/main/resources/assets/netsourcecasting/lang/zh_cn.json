@@ -1,10 +1,4 @@
 {
-  "message.netsourcecasting.terminal_not_linked": "未找到已绑定的无线终端：请把无线终端放入 ME 无线接入点完成配对。",
-  "message.netsourcecasting.network_not_found": "找不到终端绑定的 ME 网络：接入点可能已被拆除或所在区块未加载。",
-  "message.netsourcecasting.no_source_storage": "当前网络中没有魔源",
-  "message.netsourcecasting.bd_no_primary_net": "没有主维度网络：请先创建维度网络，并在主网络切换器中选中它。",
-  "message.netsourcecasting.bd_no_source": "此维度网络中没有魔源：请通过维度魔源通道把魔源导入网络。",
-  "message.netsourcecasting.no_source_available": "没有可用的魔源来源：请绑定 ME 无线终端，或加入并选中一个维度网络。",
   "netsourcecasting.config.network_pays_full_cost": "网络优先支付整笔花费",
   "netsourcecasting.config.me_first": "ME 网络优先支付",
   "netsourcecasting.section.guide": "网络魔源施法",

@@ -46,11 +46,14 @@ public abstract class LivingCasterMixin {
             "Lcom/hollingsworth/arsnouveau/api/mana/IManaCap;removeMana(D)D";
 
     /**
-     * 施法前的「魔力是否足够」判定：把来源链可提供的魔源一并计入，并给出失败提示。
+     * 施法前的「魔力是否足够」判定：把来源链可提供的魔源一并计入。
      *
      * <p>原逻辑只看玩家自身魔力（{@code totalCost <= mana.getCurrentMana()}），
      * 这里改为「来源链可提供魔源 >= 玩家魔力缺口」。非玩家实体、没有魔力能力值、
      * 或玩家魔力本来就够时，一律原样返回。
+     *
+     * <p>补不上时不发任何提示，保持原样的 {@code false}，让 {@code SpellResolver.enoughMana}
+     * 按原版报 {@code ars_nouveau.spell.no_mana}——失败提示只保留原版这一条，本模组不另发消息。
      */
     @Inject(method = "enoughMana", at = @At("RETURN"), cancellable = true)
     private void netsourcecasting$enoughMana(int totalCost, CallbackInfoReturnable<Boolean> cir) {
@@ -75,23 +78,18 @@ public abstract class LivingCasterMixin {
         // 模拟量与扣费阶段实际要取的量保持一致，避免判定按 Long.MAX_VALUE、扣费按缺口这种不一致。
         SourceChain chain = SourceChain.resolve(player);
         if (chain.isEmpty()) {
-            // 一条来源通道都没装时本模组无事可做，静默放行——那不是玩家的配置问题。
-            if (chain.anyChannelInstalled()) {
-                player.displayClientMessage(chain.unavailableReason(), true);
-            }
+            // 没有一路来源可用（一条通道都没装，或装了却解析不出网络）：静默放行。
             return;
         }
         if (chain.availableFor(needed) >= needed) {
             cir.setReturnValue(true);
             return;
         }
+        // 凑不出所需量：不发提示，交由原版报「魔力不足。」
         // TODO(临时诊断，验证通过后删除)
         NetworkSourceCasting.LOGGER.info(
                 "[netsourcecasting-diag] enoughMana 判定失败: needed={} 来源可取={}",
                 needed, chain.availableFor(needed));
-        if (chain.availableFor(1L) <= 0L) {
-            player.displayClientMessage(chain.emptySourceReason(), true);
-        }
     }
 
     /**
@@ -114,8 +112,8 @@ public abstract class LivingCasterMixin {
      * 较小者，因此<b>绝不会透支</b>。
      *
      * <p>若网络一点都取不出来（未绑定 / 接入点不可达 / 没有魔源存储），则整笔回落玩家魔力，
-     * 即 Ars Nouveau 原版行为。此时不额外提示：判定阶段（{@code enoughMana}）已经给过提示，
-     * 避免一次施法出现两条消息。
+     * 即 Ars Nouveau 原版行为；这里不发提示——判定阶段（{@code enoughMana}）已经把结果交给
+     * 原版，由 {@code ars_nouveau.spell.no_mana} 统一报错。
      */
     @WrapOperation(method = "expendMana", at = @At(value = "INVOKE", target = REMOVE_MANA_CALL))
     private double netsourcecasting$payFromNetwork(
