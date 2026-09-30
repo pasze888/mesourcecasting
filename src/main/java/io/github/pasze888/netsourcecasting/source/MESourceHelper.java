@@ -7,8 +7,6 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.storage.StorageHelper;
 import appeng.items.tools.powered.WirelessTerminalItem;
 import gripe._90.arseng.me.key.SourceKey;
-import io.github.pasze888.netsourcecasting.NetworkSourceCasting;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -106,10 +104,5 @@ public final class MESourceHelper {
                 IActionSource.ofPlayer(player),
                 mode);
         return Math.max(extracted, 0L);
-    }
-
-    /** 本模组命名空间下的资源 ID。 */
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(NetworkSourceCasting.MODID, path);
     }
 }
