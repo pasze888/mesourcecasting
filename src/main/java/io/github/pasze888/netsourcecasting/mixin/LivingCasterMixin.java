@@ -5,7 +5,6 @@ import com.hollingsworth.arsnouveau.api.spell.wrapped_caster.LivingCaster;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.pasze888.netsourcecasting.NetworkSourceCasting;
 import io.github.pasze888.netsourcecasting.NetworkSourceCastingConfig;
 import io.github.pasze888.netsourcecasting.source.SourceChain;
 import io.github.pasze888.netsourcecasting.source.SourceCost;
@@ -86,10 +85,6 @@ public abstract class LivingCasterMixin {
             return;
         }
         // 凑不出所需量：不发提示，交由原版报「魔力不足。」
-        // TODO(临时诊断，验证通过后删除)
-        NetworkSourceCasting.LOGGER.info(
-                "[netsourcecasting-diag] enoughMana 判定失败: needed={} 来源可取={}",
-                needed, chain.availableFor(needed));
     }
 
     /**
@@ -139,11 +134,6 @@ public abstract class LivingCasterMixin {
 
         // 网络付剩下的部分归玩家；玩家只可能付自己已有的魔力（宁可少付也不透支）。
         double playerPays = Math.min(playerMana, Math.max(0.0D, totalCost - paidByNetwork));
-        // TODO(临时诊断，验证通过后删除)
-        NetworkSourceCasting.LOGGER.info(
-                "[netsourcecasting-diag] totalCost={} playerMana={} needed={} paidByNetwork={} playerPays={} 付整笔={}",
-                totalCost, playerMana, needed, paidByNetwork, playerPays,
-                NetworkSourceCastingConfig.NETWORK_PAYS_FULL_COST.get());
         return original.call(mana, playerPays);
     }
 
